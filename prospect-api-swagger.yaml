@@ -1,0 +1,535 @@
+swagger: '2.0'
+info:
+  description: >-
+    Prospect Registration Flow
+  version: 1.0.0
+  title: Prospect Registration Flow
+  termsOfService: 'http://swagger.io/terms/'
+  contact:
+    email: madhur.kumar@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+host: abc.com
+basePath: /v1
+tags:
+  - name: prospect-registration
+    description: Prospect registration process
+    externalDocs:
+      description: Find out more
+      url: 'http://swagger.io'
+  - name: prospect
+    description: Access to prospect operations
+schemes:
+  - https
+  - http
+paths:
+  /prospect:
+    post:
+      tags:
+        - prospect
+      summary: Add a new prospect
+      description: ''
+      operationId: addProspect
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Prospect object that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/Prospect'
+      responses:
+        '200':
+          description: Prospect created sucessfully
+        '405':
+          description: Invalid input
+    put:
+      tags:
+        - prospect
+      summary: Update an existing prospect
+      description: ''
+      operationId: updateProspect
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Prospect object that needs to be updated based on prospect id
+          required: true
+          schema:
+            $ref: '#/definitions/Prospect'
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Prospect not found
+        '405':
+          description: Validation exception
+      security:
+        - Bearer: []
+  /prospects/findByEmailId:
+    get:
+      tags:
+        - prospect
+      summary: Finds prospect by email id
+      operationId: findPropspectByEmailId
+      produces:
+        - application/json
+      parameters:
+        - name: emailId
+          in: query
+          description: Email Id values that need to be considered for filter
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Prospect'
+        '400':
+          description: Invalid email id value
+      security:
+        - Bearer: []
+  /prospect/verifyEmail:
+    get:
+      tags:
+        - prospect
+      summary: Verify email for prospect
+      operationId: verifyProspectEmail
+      produces:
+        - application/json
+      parameters:
+        - name: emailVerificationKey
+          in: query
+          description: Email verification key sent to the user in email
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid or expired email verification key value
+  /prospects/{prospectId}:
+    get:
+      tags:
+        - prospect
+      summary: Find prospect by ID
+      description: Returns a single prospect
+      operationId: getProspectById
+      produces:
+        - application/json
+      parameters:
+        - name: prospectId
+          in: path
+          description: ID of prospect to return
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Prospect'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Prospect not found
+    delete:
+      tags:
+        - prospect
+      summary: Deletes a prospect
+      description: ''
+      operationId: deleteProspect
+      produces:
+        - application/json
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+        - name: prospectId
+          in: path
+          description: Prospect id to delete
+          required: true
+          type: string
+      responses:
+        '400':
+          description: Invalid prospect ID supplied
+        '404':
+          description: prospect not found
+      security:
+        - Bearer: []
+        - prospect_auth:
+            - 'admin:prospect'
+  /prospects/{prospectId}/eKYC:
+    post:
+      tags:
+        - prospect
+      summary: verify e-kyc status for the prospect
+      description: ''
+      operationId: verifyeKYC
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+        - name: prospectId  
+          in: path
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Prospect object that needs to be updated based on prospect id
+          required: true
+          schema:
+            $ref: '#/definitions/UserKYC'
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponse'
+      security:
+        - Bearer: []
+  /prospect/{prospectId}/uploadDocument:
+    post:
+      tags:
+        - prospect
+      summary: uploads a document
+      description: ''
+      operationId: uploadDocument
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/json
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+        - name: prospectId
+          in: path
+          description: ID of propsect to update
+          required: true
+          type: string
+        - name: documentId
+          in: path
+          description: Document id to pass to server
+          required: true
+          type: string
+        - name: file
+          in: formData
+          description: file to upload
+          required: true
+          type: file
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/ApiResponse'
+      security:
+        - Bearer: []
+        - prospect_auth:
+            - 'write:prospect'
+            - 'read:prospect'
+  /security/user:
+    post:
+      tags:
+        - prospect
+      summary: create user for prospect
+      description: ''
+      operationId: addUser
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: user
+          description: Prospect user that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '200':
+          description: Prospect user created sucessfully
+        '405':
+          description: Invalid input
+  /security/user/availability:
+    get:
+      tags:
+       - prospect
+      summary: Check user name availability for prospect
+      operationId: checkUserNameAvailability
+      produces:
+        - application/json
+      parameters:
+        - name: userName
+          in: query
+          description: User name value that need to be checked
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid email id value
+  /security/user/updatePassword:
+    post:
+      tags:
+        - prospect
+      summary: Update password for prospect user
+      description: ''
+      operationId: updatePassword
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+        - in: body
+          name: credential
+          description: User and password details for update operation
+          required: true
+          schema:
+            $ref: '#/definitions/Credential'
+      responses:
+        '200':
+          description: Updateded password sucessfully
+        '405':
+          description: Invalid input
+      security:
+        - Bearer: []
+  /security/user/forgotPassword:
+    post:
+      tags:
+        - prospect
+      summary: Forgot password flow for prospect user
+      description: ''
+      operationId: forgotPassword
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: user
+          description: User that needs password recovery
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '200':
+          description: Forgot password recovery initiated sucessfully
+        '405':
+          description: Invalid input
+  /security/user/login:
+    post:
+      tags:
+        - prospect
+      summary: Autenticate user
+      description: ''
+      operationId: authenticate
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: user
+          description: User that needs to be authenticated
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '200':
+          description: User authenticated sucessfully
+          schema:
+            $ref: '#/definitions/Token'
+        '405':
+          description: Invalid input
+securityDefinitions:
+  Bearer:
+    description: A valid JWT token must be passed in the Authorization header
+    type: apiKey
+    name: Authorization
+    in: header
+  prospect_auth:
+    type: oauth2
+    authorizationUrl: 'http://prospect.arisha.com/oauth/dialog'
+    flow: implicit
+    scopes:
+      'write:prospect': modify your prospect details
+      'admin:prospect': adminstrator for managing prospect
+      'read:prospect': read your prospect details
+definitions:
+  BankDetails:
+    type: object
+    required: 
+      - bankAccountNo
+      - ifscCode
+      - micrCode
+      - branch
+    properties:
+      bankAccountNo:
+        type: string
+      ifscCode:
+        type: string
+      micrCode:
+        type: string
+      branch:
+        type: string
+  Address:
+    type: object
+    required:
+      - streetNo
+      - streetName
+      - locality
+      - city
+      - province
+      - country
+      - postalCode
+    properties:
+      streetNo:
+        type: string
+      streetName:
+        type: string
+      locality:
+        type: string
+      city:
+        type: string
+      province:
+        type: string
+      country:
+        type: string
+      postalCode:
+        type: string
+  Prospect:
+    type: object
+    required:
+      - emailId
+      - firstName
+      - lastName
+      - phoneNumber
+    properties:
+      emailId:
+        type: string
+        format: email
+      firstName:
+        type: string
+      lastName:
+        type: string
+      mobileNumer:
+        type: string
+      customerType:
+        type: string
+        enum: [RI,NRI,FNOCI,FN]
+      maidenName:
+        type: string
+      gender:
+        type: string
+        enum: [M,F,O]
+      maritalStatus:
+        type: string
+        enum: [S,M,W,D]
+      citizenship:
+        type: string
+        enum: [IN,CA]
+      contactDetails:
+        type: object
+        properties: 
+          currentAddress:
+            $ref: '#/definitions/Address'
+          permanentAddress:
+            $ref: '#/definitions/Address'
+          permanentSameAsCurrent:
+            type: boolean
+      otherDetails:
+        type: object
+        properties:
+          fatherOrSpouseName:
+            type: string
+          motherName:
+            type: string
+          occupation:
+            type: string
+          annualIncome:
+            type: integer
+            enum: [1,2,3,4,5]
+          pep:
+            type: boolean
+          tradingExperience:
+            type: integer
+            enum: [1,2,3]
+      bankDetails:
+        $ref: '#/definitions/BankDetails'
+  User:
+    type: object
+    required:
+      - userName
+      - password
+    properties:
+      userName:
+        type: string
+      password:
+        type: string
+        format: password
+  Credential:
+    type: object
+    required:
+      - userName
+      - oldPassword
+      - newPassword
+    properties:
+      userName:
+        type: string
+      oldPassword:
+        type: string
+      newPassword:
+        type: string
+  UserKYC:
+    type: object
+    required:
+      - panNo
+      - dateOfBirth
+    properties:
+      panNumber:
+        type: string
+      dateOfBirth:
+        type: string
+        format: date
+      aadharNumber: 
+        type: string  
+  Token:
+    type: object
+    properties:
+      token: 
+       type: string
+  ApiResponse:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      type:
+        type: string
+      message:
+        type: string
+externalDocs:
+  description: Find out more about Swagger
+  url: 'http://swagger.io'
