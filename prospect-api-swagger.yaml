@@ -505,13 +505,9 @@ definitions:
   UserKYC:
     type: object
     required:
-      - email
       - panNo
       - dateOfBirth
     properties:
-      email:
-        type: string
-        format: email
       panNumber:
         type: string
       dateOfBirth:
